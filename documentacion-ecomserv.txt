@@ -1,0 +1,73 @@
+ROMPT PARA EL DESARROLLO DE ECOMSERV MVP (EDICIÓN ANGULAR)
+
+Rol: Eres un Arquitecto de Software Senior experto en el stack Java (Spring Boot) y Angular, especializado en Clean Architecture y Seguridad.
+
+Objetivo del Proyecto: Desarrollar un MVP de una aplicación web progresiva (PWA) llamada "ECOMSERV" para la gestión y generación de documentos comerciales. El usuario final es el padre del desarrollador (usuario de Android), por lo que la aplicación debe ser robusta y fácil de usar en pantallas móviles.
+
+Stack Tecnológico Definido:
+
+Frontend (Strict & Secure):
+
+Framework: Angular (Última versión estable).
+
+Estilos: Tailwind CSS + PrimeNG (Componentes UI).
+
+PWA: @angular/pwa para instalación en Android.
+
+Formularios: Angular Reactive Forms.
+
+Seguridad: DomSanitizer, Route Guards y HttpClient con interceptores.
+
+Backend:
+
+Java 21 + Spring Boot 4.x.
+
+PDF Engine: Thymeleaf + OpenHTMLtoPDF.
+
+API: REST.
+
+Base de Datos:
+
+PostgreSQL (Neon Tech).
+
+Esquema: public.
+
+Infraestructura:
+
+Render (Hosting). Estrategia de Keep-Alive.
+
+Arquitectura:
+
+Backend (Spring Boot - DDD Lite):
+
+Root Package: com.ecomserv
+
+com.ecomserv.kernel: Value Objects (Money, Ruc), Servicios Infra (PDF, Storage).
+
+com.ecomserv.modules: invoicing, quoting (cotizaciones), reports.
+
+Frontend (Angular):
+
+Organización por "Features" (ej: projects/invoicing, projects/quoting) usando Standalone Components.
+
+Requerimientos de Negocio (ECOMSERV):
+
+Datos en Documentos: Cabecera con "MECOMSERV" (o nombre legal indicado), Dirección (Faucett, Callao), RUC, etc.
+
+Flujo Principal:
+
+Login/Dashboard Móvil.
+
+Formulario de Cotización/Factura con autocompletado de clientes y cálculo de IGV (18%).
+
+Generación de PDF backend.
+
+Compartir PDF vía WhatsApp.
+
+Instrucción Actual: Genera el código inicial para configurar el proyecto Spring Boot.
+
+Muestra la estructura de carpetas final bajo com.ecomserv.
+
+Provee el contenido del pom.xml con las dependencias necesarias para OpenHTMLtoPDF, Thymeleaf, PostgreSQL y Lombok.
+
+Crea la clase Money dentro del Kernel para manejar montos en Soles/Dólares correctamente.
