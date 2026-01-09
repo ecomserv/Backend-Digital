@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8" />
+    <title th:text="'Cotización ' + ${quote.documentNumber} + ' - ECOMSERV'">Cotización - ECOMSERV</title>
+    <style>
+        @page {
+            margin: 4mm;
+            size: A4;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 11px;
+            color: #000;
+            line-height: 1.3;
+            background: #ffffff;
+            padding: 8px;
+        }
+
+        .page-container {
+            width: 100%;
+            max-width: 210mm;
+            margin: 0 auto;
+        }
+
+        /* HEADER */
+        .header-table {
+            width: 100%;
+            border-collapse: collapse;
+            border-bottom: 2px solid #1e3a8a;
+            margin-bottom: 6px;
+        }
+
+        .header-table td {
+            vertical-align: top;
+            padding-bottom: 6px;
+        }
+
+        .logo-img {
+            max-width: 240px;
+            height: auto;
+        }
+
+        .company-info {
+            text-align: right;
+            padding-left: 20px;
+        }
+
+        .quote-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #1e3a8a;
+            margin-bottom: 8px;
+        }
+
+        .quote-number {
+            font-size: 16px;
+            font-weight: bold;
+            color: #1e3a8a;
+            background: #e8f0fe;
+            padding: 4px 12px;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .company-details {
+            font-size: 11px;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .company-details .ruc {
+            font-size: 13px;
+            font-weight: bold;
+            color: #c00;
+        }
+
+        /* CLIENT INFO */
+        .client-section {
+            margin-bottom: 6px;
+            font-size: 11px;
+        }
+
+        .client-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 6px;
+        }
+
+        .client-table td {
+            vertical-align: top;
+            padding: 2px 0;
+        }
+
+        .client-label {
+            width: 90px;
+            font-weight: bold;
+            color: #1e3a8a;
+        }
+
+        .intro-text {
+            margin: 5px 0;
+            font-size: 11px;
+        }
+
+        /* ITEMS TABLE */
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 0;
+            min-height: 300px;
+        }
+
+        .items-table thead th {
+            background: #1e3a8a;
+            color: white;
+            padding: 6px 5px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            text-align: center;
+            border-bottom: 2px solid #1e3a8a;
+        }
+
+        .items-table tbody td {
+            font-size: 11px;
+            color: #000;
+            padding: 5px 5px;
+            border: none;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        /* TOTALS */
+        .totals-section {
+            width: 100%;
+            margin-top: 0;
+            border: 2px solid #1e3a8a;
+            border-top: none;
+        }
+
+        .totals-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .totals-table td {
+            padding: 5px 12px;
+            font-size: 12px;
+        }
+
+        .totals-label {
+            font-weight: bold;
+            color: #1e3a8a;
+            text-align: right;
+        }
+
+        .totals-value {
+            font-weight: bold;
+            text-align: right;
+            width: 120px;
+        }
+
+        .totals-row-bg {
+            background-color: #ffffff;
+        }
+
+        .totals-soles-bg {
+            background: #1e3a8a;
+            color: white;
+        }
+
+        .totals-soles-bg .totals-label,
+        .totals-soles-bg .totals-value {
+            color: white;
+            font-size: 13px;
+        }
+
+        /* CONDITIONS */
+        .conditions-container {
+            border: 2px solid #1e3a8a;
+            margin-top: 4px;
+        }
+
+        .conditions-header-table {
+            width: 100%;
+            background: #ffffff;
+            border-bottom: 1px solid #1e3a8a;
+            border-collapse: collapse;
+        }
+
+        .conditions-header-table td {
+            padding: 4px 6px;
+            font-size: 10px;
+            vertical-align: middle;
+        }
+
+        .condition-label-big {
+            font-weight: bold;
+            color: #1e3a8a;
+        }
+
+        .condition-value-big {
+            color: #c00;
+            font-weight: bold;
+        }
+
+        .condition-total-big {
+            font-weight: bold;
+            color: #c00;
+            font-size: 14px;
+            text-align: right;
+        }
+
+        .conditions-body-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #ffffff;
+        }
+
+        .conditions-body-table td {
+            padding: 2px 8px;
+            font-size: 11px;
+            vertical-align: top;
+        }
+
+        .condition-row-label {
+            width: 130px;
+            font-weight: bold;
+            color: #1e3a8a;
+        }
+
+        /* PAYMENT and SIGNATURE */
+        .payment-signature-table {
+            width: 100%;
+            margin-top: 0px;
+            border-collapse: collapse;
+        }
+
+        .payment-signature-table td {
+            vertical-align: top;
+        }
+
+        .bcp-title {
+            font-weight: bold;
+            color: #1e3a8a;
+            font-size: 11px;
+            margin-bottom: 4px;
+            padding-bottom: 2px;
+        }
+
+        .bcp-details {
+            font-size: 11px;
+            line-height: 1.4;
+            color: #333;
+        }
+
+        .signature-img {
+            max-width: 140px;
+            max-height: 70px;
+        }
+
+        /* FAREWELL */
+        .farewell {
+            margin: 6px 0;
+            font-size: 11px;
+            color: #333;
+        }
+
+        /* FOOTER */
+        .footer {
+            margin-top: 4px;
+            padding-top: 4px;
+            border-top: 2px solid #1e3a8a;
+            text-align: center;
+        }
+
+        .footer-brands {
+            max-width: 100%;
+            max-height: 80px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page-container">
+        <!-- HEADER -->
+        <table class="header-table">
+            <tr>
+                <td class="logo-section" style="width: 280px;">
+                    <img th:src="${logoBase64}" alt="ECOMSERV" class="logo-img" />
+                </td>
+                <td class="company-info">
+                    <div class="quote-title">COTIZACIÓN: <span class="quote-number"
+                            th:text="${quote.documentNumber}">CES-00001</span></div>
+                    <div class="company-details">
+                        <div class="ruc" th:text="'RUC: ' + ${companyRuc}">RUC: 20602689809</div>
+                        <div th:text="${companyAddress}">Urb. Faucett Mz E Lte 8 - Callao</div>
+                        <div th:text="'Telf: ' + ${companyPhone}">Telf: 945464470</div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <!-- CLIENT INFO -->
+        <div class="client-section">
+            <table class="client-table">
+                <tr>
+                    <td style="width: 50%;">
+                        <table style="width: 100%;">
+                            <tr>
+                                <td class="client-label">FECHA</td>
+                                <td th:text="': ' + ${#temporals.format(quote.documentDate, 'dd/MM/yyyy')}">: 01/01/2025
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="client-label">SEÑOR</td>
+                                <td th:text="': ' + (${quote.clientName} ?: 'VENTA CONTADO')">: Cliente</td>
+                            </tr>
+                            <tr>
+                                <td class="client-label">DIRECCION</td>
+                                <td th:text="': ' + (${quote.clientAddress} ?: '')">:</td>
+                            </tr>
+                            <tr>
+                                <td class="client-label">TELEFONO</td>
+                                <td th:text="': ' + (${quote.clientMobile} ?: '')">:</td>
+                            </tr>
+                            <tr>
+                                <td class="client-label">ATTE</td>
+                                <td th:text="': ' + (${quote.atte} ?: '')">:</td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td style="width: 50%;">
+                        <table style="width: 100%;">
+                            <tr>
+                                <td class="client-label">REFERENCIA</td>
+                                <td th:text="': ' + (${quote.clientReference} ?: '')">:</td>
+                            </tr>
+                            <tr>
+                                <td class="client-label">RUC</td>
+                                <td th:text="': ' + (${quote.clientRuc} ?: '')">:</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+
+            <div class="intro-text">
+                <strong>Estimados señores:</strong><br />
+                Por medio de la presente nos es grato cotizarles lo siguiente:
+            </div>
+        </div>
+
+        <!-- ITEMS TABLE -->
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th style="width: 30px;">ITM</th>
+                    <th style="width: 100px;">CODIGO</th>
+                    <th>DESCRIPCION</th>
+                    <th style="width: 50px;">U.M.</th>
+                    <th style="width: 60px;">CANT.</th>
+                    <th style="width: 80px;">P.UNIT.</th>
+                    <th style="width: 80px;">TOTAL</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="item, stat : ${quote.items}">
+                    <td class="text-center" th:text="${stat.index + 1}">1</td>
+                    <td class="text-center" th:text="${item.code}"></td>
+                    <td th:text="${item.description}" style="white-space: pre-wrap;">Descripción</td>
+                    <td class="text-center" th:text="${item.unitMeasure} ?: 'UND'">UND</td>
+                    <td class="text-center" th:text="${#numbers.formatDecimal(item.quantity, 1, 2)}">1.00</td>
+                    <td class="text-right" th:text="${#numbers.formatDecimal(item.unitPrice, 1, 2)}">0.00</td>
+                    <td class="text-right" style="font-weight: 500;"
+                        th:text="${#numbers.formatDecimal(item.subtotal, 1, 2)}">0.00</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- TOTALS -->
+        <div class="totals-section">
+            <table class="totals-table">
+                <!-- Subtotal -->
+                <tr class="totals-row-bg">
+                    <td colspan="3"></td>
+                    <td class="totals-label">Subtotal</td>
+                    <td class="totals-value" th:text="${subtotalFormatted}">S/. 0.00</td>
+                </tr>
+                <!-- IGV -->
+                <tr class="totals-row-bg">
+                    <td colspan="3"></td>
+                    <td class="totals-label">IGV (18%)</td>
+                    <td class="totals-value" th:text="${igvFormatted}">S/. 0.00</td>
+                </tr>
+                <!-- Total -->
+                <tr class="totals-soles-bg">
+                    <td style="text-align: right;">EN:</td>
+                    <td colspan="2" style="text-align: right; width: auto; font-weight: bold;">SOLES</td>
+                    <td class="totals-label" style="width: 100px;">TOTAL:</td>
+                    <td class="totals-value" th:text="${totalPEN}">S/. 0.00</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- CONDITIONS -->
+        <div class="conditions-container">
+            <table class="conditions-body-table">
+                <tr>
+                    <td style="height: 5px;"></td>
+                    <td style="height: 5px;"></td>
+                </tr>
+                <tr>
+                    <td class="condition-row-label">Garantías</td>
+                    <td>: 3 meses por servicio</td>
+                </tr>
+                <tr>
+                    <td class="condition-row-label">Plazo de entrega</td>
+                    <td>: 01 día contado a partir de la aprobación de la cotización y/o recepción de la orden de
+                        compra.
+                    </td>
+                </tr>
+                <tr>
+                    <td class="condition-row-label">Forma de pago</td>
+                    <td>: Contado contra entrega</td>
+                </tr>
+                <tr>
+                    <td class="condition-row-label">Tipo de moneda</td>
+                    <td>: Todos los precios son expresados en soles</td>
+                </tr>
+                <tr>
+                    <td class="condition-row-label">Impuestos</td>
+                    <td>: LOS PRECIOS UNITARIOS Y EL TOTAL INCLUYEN el Impuesto General a las Ventas (18%).</td>
+                </tr>
+                <tr>
+                    <td class="condition-row-label">Validez de la oferta</td>
+                    <td>: 04 días sujeto a variación sin previo aviso.</td>
+                </tr>
+                <tr th:if="${quote.notes != null and !quote.notes.isEmpty()}">
+                    <td class="condition-row-label">Observación</td>
+                    <td th:text="': ' + ${quote.notes}">:</td>
+                </tr>
+                <tr>
+                    <td style="height: 5px;"></td>
+                    <td style="height: 5px;"></td>
+                </tr>
+            </table>
+
+            <!-- PAYMENT and SIGNATURE -->
+            <table class="payment-signature-table" style="background: #ffffff; padding: 4px;">
+                <tr>
+                    <td style="padding: 4px;">
+                        <div class="bcp-title">NÚMERO DE CUENTA SOLES BCP</div>
+                        <div class="bcp-details">
+                            <strong th:text="${bankTitular}">ECOMSERV SAC</strong><br />
+                            RUC: <span th:text="${bankRuc}">20602689809</span><br />
+                            Número cuenta BCP: <span th:text="${bankAccount}">1912486011021</span><br />
+                            Código interbancario CCI: <span th:text="${bankCCI}">002-19100248601102152</span>
+                        </div>
+                    </td>
+                    <td style="text-align: center; vertical-align: bottom; padding: 10px;">
+                        <img th:src="${firmaBase64}" class="signature-img" alt="Firma" />
+                        <div style="font-size: 10px; margin-top: 5px; font-weight: bold;">VENTAS</div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- FAREWELL -->
+        <div class="farewell">
+            Sin otro particular, quedamos de ustedes.
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            <img th:src="${footerBase64}" class="footer-brands" alt="Marcas" />
+        </div>
+    </div>
+</body>
+
+</html>

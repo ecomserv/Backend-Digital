@@ -1,7 +1,20 @@
 {
   "permissions": {
     "allow": [
-      "Bash(dir /b \"c:\\\\Users\\\\alexa\\\\OneDrive\\\\Desktop\\\\Proyectos\\\\ecomserv-api\\\\src\\\\main\\\\java\")"
+      "Bash(dir /b \"c:\\\\Users\\\\alexa\\\\OneDrive\\\\Desktop\\\\Proyectos\\\\ecomserv-api\\\\src\\\\main\\\\java\")",
+      "Bash(dir:*)",
+      "Bash(del:*)",
+      "Bash(openssl rand:*)",
+      "Bash(test:*)",
+      "Bash(while read file)",
+      "Bash(do basename \"$file\")",
+      "Bash(done)",
+      "Bash(grep:*)",
+      "Bash(rm:*)",
+      "Bash(mkdir:*)",
+      "Bash(if not exist \"c:\\\\Users\\\\alexa\\\\OneDrive\\\\Desktop\\\\Proyectos\\\\ecomserv-api\\\\src\\\\main\\\\resources\\\\static\" mkdir \"c:\\\\Users\\\\alexa\\\\OneDrive\\\\Desktop\\\\Proyectos\\\\ecomserv-api\\\\src\\\\main\\\\resources\\\\static\")",
+      "Bash(python:*)",
+      "Bash(pip install:*)"
     ]
   }
 }
