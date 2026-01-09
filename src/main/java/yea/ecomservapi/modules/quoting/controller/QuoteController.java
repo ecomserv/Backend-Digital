@@ -8,13 +8,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import yea.ecomservapi.kernel.service.FileStorageService;
 import yea.ecomservapi.kernel.service.PdfGeneratorService;
+import yea.ecomservapi.modules.quoting.domain.Quote;
 import yea.ecomservapi.modules.quoting.dto.CreateQuoteRequest;
 import yea.ecomservapi.modules.quoting.dto.QuoteDTO;
-import yea.ecomservapi.modules.quoting.service.QuoteService;
-import yea.ecomservapi.modules.quoting.service.EmailService;
 import yea.ecomservapi.modules.quoting.dto.SendEmailRequest;
+import yea.ecomservapi.modules.quoting.service.EmailService;
+import yea.ecomservapi.modules.quoting.service.QuoteService;
 
 import java.util.List;
 import java.util.Map;
@@ -28,7 +28,6 @@ public class QuoteController {
 
     private final QuoteService quoteService;
     private final PdfGeneratorService pdfGeneratorService;
-    private final FileStorageService fileStorageService;
     private final EmailService emailService;
 
     @PostMapping("/generate")
@@ -36,10 +35,10 @@ public class QuoteController {
         // Generar número de documento o usar el proporcionado
         String documentNumber;
         if (request.getDocumentNumber() != null && !request.getDocumentNumber().isBlank()
-                && !request.getDocumentNumber().equals("CES-XXXXX")) {
+                && !request.getDocumentNumber().equals("XXXXX")) {
             documentNumber = request.getDocumentNumber();
         } else {
-            documentNumber = fileStorageService.generateNextDocumentNumber();
+            documentNumber = quoteService.generateNextDocumentNumber();
         }
 
         // Construir DTO con el número generado
@@ -48,11 +47,8 @@ public class QuoteController {
         // Generar PDF
         byte[] pdf = pdfGeneratorService.generateQuotePdf(quoteDTO);
 
-        // Guardar PDF en carpeta local
-        fileStorageService.savePdf(pdf, documentNumber);
-
-        // Guardar datos JSON para futura edición
-        fileStorageService.saveJson(request, documentNumber);
+        // Guardar en base de datos (solo JSON metadata)
+        quoteService.saveQuote(request, documentNumber);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,
@@ -76,66 +72,67 @@ public class QuoteController {
 
     @GetMapping("/{documentNumber}/pdf")
     public ResponseEntity<byte[]> downloadPdf(@PathVariable String documentNumber) {
-        return fileStorageService.getPdf(documentNumber)
-                .map(pdf -> ResponseEntity.ok()
-                        .header(HttpHeaders.CONTENT_DISPOSITION,
-                                "attachment; filename=" + documentNumber + ".pdf")
-                        .contentType(MediaType.APPLICATION_PDF)
-                        .body(pdf))
+        // Regenerar PDF desde JSON en base de datos
+        return quoteService.getQuoteData(documentNumber)
+                .map(request -> {
+                    QuoteDTO quoteDTO = quoteService.buildQuoteDTO(request, documentNumber);
+                    byte[] pdf = pdfGeneratorService.generateQuotePdf(quoteDTO);
+                    return ResponseEntity.ok()
+                            .header(HttpHeaders.CONTENT_DISPOSITION,
+                                    "attachment; filename=" + documentNumber + ".pdf")
+                            .contentType(MediaType.APPLICATION_PDF)
+                            .body(pdf);
+                })
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/{documentNumber}/exists")
     public ResponseEntity<Map<String, Boolean>> checkExists(@PathVariable String documentNumber) {
-        boolean exists = fileStorageService.existsPdf(documentNumber);
+        boolean exists = quoteService.existsQuote(documentNumber);
         return ResponseEntity.ok(Map.of("exists", exists));
     }
 
     @DeleteMapping("/{documentNumber}")
     public ResponseEntity<Void> deletePdf(@PathVariable String documentNumber) {
-        boolean deleted = fileStorageService.deletePdf(documentNumber);
+        boolean deleted = quoteService.deleteQuote(documentNumber);
         return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
 
     @GetMapping("/next-number")
     public ResponseEntity<Map<String, String>> getNextDocumentNumber() {
-        String nextNumber = fileStorageService.generateNextDocumentNumber();
+        String nextNumber = quoteService.generateNextDocumentNumber();
         return ResponseEntity.ok(Map.of("documentNumber", nextNumber));
     }
 
     @GetMapping
-    public ResponseEntity<List<FileStorageService.QuoteFileInfo>> listAllQuotes() {
-        return ResponseEntity.ok(fileStorageService.listAllQuotes());
+    public ResponseEntity<List<QuoteSummaryDTO>> listAllQuotes() {
+        List<Quote> quotes = quoteService.listAllQuotes();
+        List<QuoteSummaryDTO> summaries = quotes.stream()
+                .map(this::toSummaryDTO)
+                .toList();
+        return ResponseEntity.ok(summaries);
     }
 
     @GetMapping("/summary")
-    public ResponseEntity<List<FileStorageService.QuoteSummary>> listAllQuotesWithSummary() {
-        return ResponseEntity.ok(fileStorageService.listAllQuotesWithSummary());
+    public ResponseEntity<List<QuoteSummaryDTO>> listAllQuotesWithSummary() {
+        List<Quote> quotes = quoteService.listAllQuotes();
+        List<QuoteSummaryDTO> summaries = quotes.stream()
+                .map(this::toSummaryDTO)
+                .toList();
+        return ResponseEntity.ok(summaries);
     }
 
     @GetMapping("/{documentNumber}/data")
     public ResponseEntity<CreateQuoteRequest> getQuoteData(@PathVariable String documentNumber) {
-        return fileStorageService.getJson(documentNumber, CreateQuoteRequest.class)
+        return quoteService.getQuoteData(documentNumber)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping("/send-email")
     public ResponseEntity<Map<String, Object>> sendQuoteEmail(@Valid @RequestBody SendEmailRequest request) {
-        byte[] pdfBytes = null;
-
-        // Cargar PDF si se solicita adjuntar
-        if (request.isAttachPdf()) {
-            pdfBytes = fileStorageService.getPdf(request.getDocumentNumber()).orElse(null);
-            if (pdfBytes == null) {
-                return ResponseEntity.badRequest()
-                        .body(Map.of("success", false, "message",
-                                "No se encontró el PDF para la cotización especificada"));
-            }
-        }
-
-        // Cargar datos como CreateQuoteRequest y convertir a QuoteDTO con totales
-        CreateQuoteRequest quoteRequest = fileStorageService.getJson(request.getDocumentNumber(), CreateQuoteRequest.class).orElse(null);
+        // Cargar datos de la base de datos
+        CreateQuoteRequest quoteRequest = quoteService.getQuoteData(request.getDocumentNumber()).orElse(null);
 
         if (quoteRequest == null) {
             return ResponseEntity.badRequest()
@@ -144,6 +141,12 @@ public class QuoteController {
 
         // Construir QuoteDTO con totales calculados
         QuoteDTO quoteData = quoteService.buildQuoteDTO(quoteRequest, request.getDocumentNumber());
+
+        // Regenerar PDF si se solicita adjuntar
+        byte[] pdfBytes = null;
+        if (request.isAttachPdf()) {
+            pdfBytes = pdfGeneratorService.generateQuotePdf(quoteData);
+        }
 
         boolean sent = emailService.sendQuoteEmail(
                 request.getToEmail(),
@@ -156,5 +159,25 @@ public class QuoteController {
             return ResponseEntity.internalServerError()
                     .body(Map.of("success", false, "message", "Error al enviar el correo"));
         }
+    }
+
+    private QuoteSummaryDTO toSummaryDTO(Quote quote) {
+        return new QuoteSummaryDTO(
+                quote.getDocumentNumber(),
+                quote.getClientName(),
+                quote.getCurrency(),
+                quote.getTotal(),
+                quote.getItemCount(),
+                quote.getCreatedAt());
+    }
+
+    // Inner DTO for summary response
+    public record QuoteSummaryDTO(
+            String documentNumber,
+            String clientName,
+            String currency,
+            java.math.BigDecimal total,
+            Integer itemCount,
+            java.time.LocalDateTime createdAt) {
     }
 }
