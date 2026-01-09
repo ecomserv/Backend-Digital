@@ -96,6 +96,15 @@ public class QuoteService {
                         // Calculate total for summary
                         BigDecimal total = calculateTotal(request);
 
+                        // Get first item description for display
+                        String firstItemDesc = null;
+                        if (request.getItems() != null && !request.getItems().isEmpty()) {
+                                firstItemDesc = request.getItems().get(0).getDescription();
+                                if (firstItemDesc != null && firstItemDesc.length() > 50) {
+                                        firstItemDesc = firstItemDesc.substring(0, 47) + "...";
+                                }
+                        }
+
                         Quote quote = Quote.builder()
                                         .documentNumber(documentNumber)
                                         .jsonData(jsonData)
@@ -103,6 +112,7 @@ public class QuoteService {
                                         .currency(request.getCurrency() != null ? request.getCurrency().name() : "PEN")
                                         .total(total)
                                         .itemCount(request.getItems() != null ? request.getItems().size() : 0)
+                                        .firstItemDescription(firstItemDesc)
                                         .build();
 
                         return quoteRepository.save(quote);

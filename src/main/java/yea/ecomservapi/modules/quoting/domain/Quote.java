@@ -36,6 +36,9 @@ public class Quote {
     @Column(name = "item_count")
     private Integer itemCount;
 
+    @Column(name = "first_item_description")
+    private String firstItemDescription;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

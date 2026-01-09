@@ -168,6 +168,7 @@ public class QuoteController {
                 quote.getCurrency(),
                 quote.getTotal(),
                 quote.getItemCount(),
+                quote.getFirstItemDescription(),
                 quote.getCreatedAt());
     }
 
@@ -178,6 +179,7 @@ public class QuoteController {
             String currency,
             java.math.BigDecimal total,
             Integer itemCount,
+            String firstItemDescription,
             java.time.LocalDateTime createdAt) {
     }
 }
