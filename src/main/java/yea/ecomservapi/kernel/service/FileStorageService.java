@@ -28,7 +28,7 @@ public class FileStorageService {
 
     private Path cotizacionesPath;
 
-    private static final Pattern DOCUMENT_NUMBER_PATTERN = Pattern.compile("CES-(\\d{5})\\.pdf");
+    private static final Pattern DOCUMENT_NUMBER_PATTERN = Pattern.compile("(\\d{5})\\.pdf");
 
     @PostConstruct
     public void init() {
@@ -129,10 +129,10 @@ public class FileStorageService {
                     .max(Integer::compareTo)
                     .orElse(0);
 
-            return String.format("CES-%05d", maxNumber + 1);
+            return String.format("%05d", maxNumber + 1);
         } catch (IOException e) {
             log.error("Error al generar número de documento", e);
-            return "CES-00001";
+            return "00001";
         }
     }
 
