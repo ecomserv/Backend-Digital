@@ -11,10 +11,16 @@ WORKDIR /app
 
 # Create non-root user for security
 RUN addgroup -S spring && adduser -S spring -G spring
-USER spring:spring
+
+# Create storage directory with proper permissions BEFORE switching user
+RUN mkdir -p /app/cotizaciones && chown -R spring:spring /app/cotizaciones
 
 # Copy the built JAR
 COPY --from=build /app/target/*.jar app.jar
+RUN chown spring:spring /app/app.jar
+
+# Switch to non-root user
+USER spring:spring
 
 # Expose port (Render will set PORT env var)
 EXPOSE 8080
