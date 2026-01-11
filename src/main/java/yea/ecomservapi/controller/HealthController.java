@@ -10,20 +10,21 @@ import java.util.Map;
 @RestController
 public class HealthController {
 
-    @GetMapping("/health")
-    public ResponseEntity<Map<String, Object>> health() {
-        return ResponseEntity.ok(Map.of(
-                "status", "UP",
-                "service", "ecomserv-api",
-                "timestamp", LocalDateTime.now().toString()
-        ));
-    }
+    /*
+     * @GetMapping("/health")
+     * public ResponseEntity<Map<String, Object>> health() {
+     * return ResponseEntity.ok(Map.of(
+     * "status", "UP",
+     * "service", "ecomserv-api",
+     * "timestamp", LocalDateTime.now().toString()
+     * ));
+     * }
+     */
 
     @GetMapping("/")
     public ResponseEntity<Map<String, String>> root() {
         return ResponseEntity.ok(Map.of(
                 "message", "ECOMSERV API is running",
-                "version", "1.0.0"
-        ));
+                "version", "1.0.0"));
     }
 }
