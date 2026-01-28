@@ -19,6 +19,9 @@ public class SendEmailRequest {
 
     private String clientName;
 
+    @Email(message = "El correo CC no es válido")
+    private String ccEmail;
+
     // Optional: if true, attach the PDF to the email
     private boolean attachPdf = true;
 }

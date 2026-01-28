@@ -21,11 +21,12 @@ public class EmailService {
    * Send a quote email to the specified recipient using Gmail SMTP.
    * 
    * @param toEmail   Recipient email address
+   * @param ccEmail   CC email address (optional)
    * @param quoteData Quote data object
    * @param pdfBytes  PDF attachment bytes (optional)
    * @return true if email was sent successfully
    */
-  public boolean sendQuoteEmail(String toEmail, yea.ecomservapi.modules.quoting.dto.QuoteDTO quoteData,
+  public boolean sendQuoteEmail(String toEmail, String ccEmail, yea.ecomservapi.modules.quoting.dto.QuoteDTO quoteData,
       byte[] pdfBytes) {
     try {
       jakarta.mail.internet.MimeMessage message = javaMailSender.createMimeMessage();
@@ -33,6 +34,9 @@ public class EmailService {
 
       helper.setFrom(fromEmail, "ECOMSERV SAC");
       helper.setTo(toEmail);
+      if (ccEmail != null && !ccEmail.isBlank()) {
+        helper.setCc(ccEmail);
+      }
       helper.setSubject("Cotización " + quoteData.getDocumentNumber() + " - ECOMSERV SAC");
 
       // Build HTML content

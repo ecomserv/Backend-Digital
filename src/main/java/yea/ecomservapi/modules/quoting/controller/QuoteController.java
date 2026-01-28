@@ -150,6 +150,7 @@ public class QuoteController {
 
         boolean sent = emailService.sendQuoteEmail(
                 request.getToEmail(),
+                request.getCcEmail(),
                 quoteData,
                 pdfBytes);
 
