@@ -13,7 +13,7 @@ public interface QuoteRepository extends JpaRepository<Quote, String> {
 
     List<Quote> findAllByOrderByCreatedAtDesc();
 
-    @Query("SELECT MAX(CAST(q.documentNumber AS integer)) FROM Quote q WHERE q.documentNumber NOT LIKE '%PREVIEW%'")
+    @Query(value = "SELECT MAX(CAST(document_number AS integer)) FROM quotes WHERE document_number ~ '^\\d+$'", nativeQuery = true)
     Optional<Integer> findMaxDocumentNumber();
 
     boolean existsByDocumentNumber(String documentNumber);

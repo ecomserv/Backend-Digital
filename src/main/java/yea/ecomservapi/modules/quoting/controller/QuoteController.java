@@ -37,7 +37,9 @@ public class QuoteController {
         // Generar número de documento o usar el proporcionado
         String documentNumber;
         if (request.getDocumentNumber() != null && !request.getDocumentNumber().isBlank()
-                && !request.getDocumentNumber().equals("XXXXX")) {
+                && !request.getDocumentNumber().equals("CES-XXXXX")
+                && !request.getDocumentNumber().equals("XXXXX")
+                && !request.getDocumentNumber().matches("(?i).*XXXXX.*")) {
             documentNumber = request.getDocumentNumber();
         } else {
             documentNumber = quoteService.generateNextDocumentNumber();
