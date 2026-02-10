@@ -110,6 +110,68 @@ public class EmailService {
         .replace("{{ITEMS_SUMMARY}}", itemsSummary);
   }
 
+  /**
+   * Send a report email to the specified recipient.
+   */
+  public boolean sendReportEmail(String toEmail, String empresa, String documentNumber, byte[] pdfBytes) {
+    try {
+      jakarta.mail.internet.MimeMessage message = javaMailSender.createMimeMessage();
+      MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+      helper.setFrom(fromEmail, "ECOMSERV SAC");
+      helper.setTo(toEmail);
+      helper.setSubject("Informe Técnico " + documentNumber + " - ECOMSERV SAC");
+
+      String empresaName = (empresa != null && !empresa.isBlank()) ? empresa : "Cliente";
+      String htmlContent = """
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <style>
+              body { margin: 0; padding: 0; background-color: #f5f5f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+              .container { max-width: 500px; margin: 20px auto; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+              .header { background: linear-gradient(135deg, #0f1d4a 0%, #1e3a8a 100%); padding: 20px; text-align: center; }
+              .header h1 { color: #fff; margin: 0; font-size: 18px; font-weight: 600; }
+              .content { padding: 25px 20px; }
+              .greeting { font-size: 14px; color: #333; margin: 0 0 15px 0; line-height: 1.5; }
+              .greeting strong { color: #1e3a8a; }
+              .pdf-note { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px 15px; margin: 20px 0 0 0; border-radius: 0 8px 8px 0; font-size: 13px; color: #92400e; }
+              .footer { background: #f8fafc; padding: 15px 20px; text-align: center; font-size: 11px; color: #64748b; border-top: 1px solid #e2e8f0; }
+              .footer strong { color: #334155; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header"><h1>ECOMSERV SAC</h1></div>
+              <div class="content">
+                <p class="greeting">Estimado(a) <strong>{{EMPRESA}}</strong>,</p>
+                <p class="greeting">Le adjuntamos el informe técnico <strong>{{DOC_NUMBER}}</strong>.</p>
+                <div class="pdf-note">El detalle completo se encuentra en el archivo PDF adjunto.</div>
+              </div>
+              <div class="footer"><strong>ECOMSERV SAC</strong> | RUC: 20602689809 | Cel: 945464470</div>
+            </div>
+          </body>
+          </html>
+          """.replace("{{EMPRESA}}", empresaName).replace("{{DOC_NUMBER}}", documentNumber);
+
+      helper.setText(htmlContent, true);
+
+      if (pdfBytes != null && pdfBytes.length > 0) {
+        helper.addAttachment("Informe-" + documentNumber + ".pdf",
+            new org.springframework.core.io.ByteArrayResource(pdfBytes));
+      }
+
+      log.info("Sending report email to {} for {}", toEmail, documentNumber);
+      javaMailSender.send(message);
+      log.info("Report email sent successfully to {} for {}", toEmail, documentNumber);
+      return true;
+    } catch (Exception e) {
+      log.error("Error sending report email to {}: {}", toEmail, e.getMessage(), e);
+      return false;
+    }
+  }
+
   private String buildItemsSummary(yea.ecomservapi.modules.quoting.dto.QuoteDTO quoteData) {
     var items = quoteData.getItems();
     if (items == null || items.isEmpty()) {

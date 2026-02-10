@@ -18,6 +18,8 @@ import yea.ecomservapi.modules.quoting.service.QuoteService;
 
 import java.util.List;
 import java.util.Map;
+import java.time.LocalDate;
+import org.springframework.format.annotation.DateTimeFormat;
 
 @RestController
 @RequestMapping("/api/quotes")
@@ -120,6 +122,13 @@ public class QuoteController {
                 .map(this::toSummaryDTO)
                 .toList();
         return ResponseEntity.ok(summaries);
+    }
+
+    @GetMapping("/stats")
+    public ResponseEntity<Map<String, Object>> getQuoteStats(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+        return ResponseEntity.ok(quoteService.getQuoteStats(from, to));
     }
 
     @GetMapping("/{documentNumber}/data")

@@ -73,4 +73,23 @@ public class AuthService {
                 .role(user.getRole().name())
                 .build();
     }
+
+    public AuthResponse updateProfile(User currentUser, String newName, String newUsername) {
+        if (newUsername != null && !newUsername.isBlank()) {
+            currentUser.setUsername(newUsername.trim());
+        }
+        if (newName != null && !newName.isBlank()) {
+            currentUser.setName(newName.trim());
+        }
+        userRepository.save(currentUser);
+
+        String token = jwtService.generateToken(currentUser);
+
+        return AuthResponse.builder()
+                .token(token)
+                .username(currentUser.getUsername())
+                .name(currentUser.getName())
+                .role(currentUser.getRole().name())
+                .build();
+    }
 }

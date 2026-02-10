@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import yea.ecomservapi.modules.quoting.dto.QuoteDTO;
+import yea.ecomservapi.modules.reports.dto.ReportDTO;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -108,6 +109,35 @@ public class PdfGeneratorService {
             builder.run();
             return os.toByteArray();
         }
+    }
+
+    // ==================== REPORT PDF ====================
+
+    public byte[] generateReportPdf(ReportDTO report) {
+        try {
+            String html = generateReportHtml(report);
+            return convertHtmlToPdf(html);
+        } catch (Exception e) {
+            log.error("Error generating PDF for report: {}", report.getDocumentNumber(), e);
+            throw new RuntimeException("Error al generar PDF de informe", e);
+        }
+    }
+
+    private String generateReportHtml(ReportDTO report) {
+        Context context = new Context();
+        context.setVariable("report", report);
+
+        // Información de empresa
+        context.setVariable("companyAddress", "Urb. Faucett Mz E Lte 8 - Callao");
+        context.setVariable("companyPhone", "945464470");
+        context.setVariable("companyEmail", "epacomser@hotmail.com");
+
+        // Imágenes embebidas en base64
+        context.setVariable("logoBase64", loadImageAsBase64("static/logo-ecomserv.png"));
+        context.setVariable("firmaInformeBase64", loadImageAsBase64("static/firma_informe.png"));
+        context.setVariable("footerBase64", loadImageAsBase64("static/footer-brands.png"));
+
+        return templateEngine.process("report-template", context);
     }
 
     private String formatNumber(BigDecimal number) {
