@@ -12,8 +12,8 @@ WORKDIR /app
 # Create non-root user for security
 RUN addgroup -S spring && adduser -S spring -G spring
 
-# Create storage directory with proper permissions BEFORE switching user
-RUN mkdir -p /app/cotizaciones && chown -R spring:spring /app/cotizaciones
+# Create storage directories with proper permissions BEFORE switching user
+RUN mkdir -p /app/cotizaciones /app/informes && chown -R spring:spring /app/cotizaciones /app/informes
 
 # Copy the built JAR
 COPY --from=build /app/target/*.jar app.jar
