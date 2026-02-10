@@ -159,7 +159,8 @@ public class QuoteService {
 
         public String generateNextDocumentNumber() {
                 int maxNumber = quoteRepository.findMaxDocumentNumber().orElse(0);
-                return String.format("%05d", maxNumber + 1);
+                int year = java.time.LocalDate.now().getYear();
+                return (maxNumber + 1) + "-" + year;
         }
 
         private BigDecimal calculateTotal(CreateQuoteRequest request) {
